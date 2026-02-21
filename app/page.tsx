@@ -1,9 +1,11 @@
 import { cookies } from "next/headers";
 import { AppLinkButton, AppPanel } from "@/lib/ui";
+import { hasValidSession } from "@/lib/auth-session";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const isLoggedIn = Boolean(cookieStore.get("auth_token")?.value);
+  const token = cookieStore.get("auth_token")?.value;
+  const isLoggedIn = await hasValidSession(token);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f5f7ff,_#f8fafc_45%,_#ffffff_80%)]">
