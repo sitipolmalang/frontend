@@ -1,27 +1,16 @@
-import { AppLinkButton, AppPanel } from "@/lib/ui";
+import { StatusPageLayout } from "@/lib/status-page";
 
 export default function UnauthorizedPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-      <AppPanel className="w-full max-w-md p-8 text-center shadow-[0_18px_70px_-45px_rgba(15,23,42,0.45)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          401 Unauthorized
-        </p>
-        <h1 className="mt-3 text-2xl font-semibold text-zinc-900">
-          Kamu belum login
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Silakan login terlebih dahulu untuk mengakses halaman ini.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <AppLinkButton href="/login" variant="primary">
-            Ke Login
-          </AppLinkButton>
-          <AppLinkButton href="/" variant="outline">
-            Home
-          </AppLinkButton>
-        </div>
-      </AppPanel>
-    </div>
+    <StatusPageLayout
+      code="401 Unauthorized"
+      title="Kamu belum login"
+      description="Silakan login terlebih dahulu untuk mengakses halaman ini."
+      badgeClassName="border border-amber-300 bg-amber-100 text-amber-700 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200"
+      actions={[
+        { href: "/login", label: "Ke Login", variant: "primary" },
+        { href: "/", label: "Home", variant: "outline" },
+      ]}
+    />
   );
 }
