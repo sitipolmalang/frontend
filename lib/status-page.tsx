@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AppLinkButton, AppPanel } from "@/lib/ui";
+import { AppLinkButton } from "@/lib/ui";
 
 type StatusAction = {
   href: string;
@@ -23,37 +23,37 @@ export function StatusPageLayout({
   actions,
 }: StatusPageProps): ReactNode {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-100 px-6 py-12 dark:bg-zinc-950">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(24,24,27,0.08),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(24,24,27,0.05),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.12),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.08),transparent_40%)]" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50 px-6 py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#e4e4e73d_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e73d_1px,transparent_1px)] bg-[size:48px_48px]" />
 
-      <AppPanel className="auth-card-reveal relative w-full max-w-lg rounded-3xl border border-zinc-300/70 bg-white/85 p-8 text-center shadow-[0_40px_140px_-70px_rgba(24,24,27,0.28)] backdrop-blur-xl dark:border-white/15 dark:bg-white/[0.04] dark:shadow-[0_40px_140px_-70px_rgba(0,0,0,0.8)]">
+      <section className="relative w-full max-w-2xl rounded-3xl border border-zinc-200 bg-white/90 p-10 text-center shadow-[0_35px_120px_-70px_rgba(24,24,27,0.45)] backdrop-blur">
         <p
-          className={`mx-auto inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${badgeClassName}`}
+          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${badgeClassName}`}
         >
           {code}
         </p>
 
-        <h1 className="mt-4 text-3xl font-semibold text-zinc-900 dark:text-white">
+        <h1 className="mt-6 text-5xl font-semibold leading-tight text-zinc-900 sm:text-6xl">
           {title}
         </h1>
 
-        <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+        <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-zinc-600 sm:text-base">
           {description}
         </p>
 
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           {actions.map((action) => (
             <AppLinkButton
               key={`${action.href}-${action.label}`}
               href={action.href}
               variant={action.variant ?? "outline"}
-              className="rounded-xl px-4 py-2.5"
+              className="rounded-xl px-5 py-2.5"
             >
               {action.label}
             </AppLinkButton>
           ))}
         </div>
-      </AppPanel>
-    </div>
+      </section>
+    </main>
   );
 }
