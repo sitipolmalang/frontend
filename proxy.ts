@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { checkAdminRole, checkSession } from "@/lib/auth-session";
+import { getAuthCookieName } from "@/lib/env";
 
 export async function proxy(request: NextRequest) {
-  const token = request.cookies.get("auth_token")?.value;
+  const authCookieName = getAuthCookieName();
+  const token = request.cookies.get(authCookieName)?.value;
   const { pathname } = request.nextUrl;
   const isDashboardRoute = pathname.startsWith("/dashboard");
   const isAdminDashboardRoute = pathname.startsWith("/dashboard/admin");
@@ -23,7 +25,7 @@ export async function proxy(request: NextRequest) {
     if (isDashboardRoute) {
       const response = NextResponse.redirect(new URL("/401", request.url));
       if (session.shouldClearCookie) {
-        response.cookies.delete("auth_token");
+        response.cookies.delete(authCookieName);
       }
       return response;
     }
@@ -31,14 +33,14 @@ export async function proxy(request: NextRequest) {
     if (isLoginRoute) {
       const response = NextResponse.next();
       if (session.shouldClearCookie) {
-        response.cookies.delete("auth_token");
+        response.cookies.delete(authCookieName);
       }
       return response;
     }
 
     const response = NextResponse.next();
     if (session.shouldClearCookie) {
-      response.cookies.delete("auth_token");
+      response.cookies.delete(authCookieName);
     }
     return response;
   }
@@ -53,7 +55,7 @@ export async function proxy(request: NextRequest) {
     if (adminCheck.kind === "unauthorized") {
       const response = NextResponse.redirect(new URL("/401", request.url));
       if (adminCheck.shouldClearCookie) {
-        response.cookies.delete("auth_token");
+        response.cookies.delete(authCookieName);
       }
       return response;
     }

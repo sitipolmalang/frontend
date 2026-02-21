@@ -60,6 +60,7 @@ Status login divalidasi ke backend (`/api/auth/session`), bukan hanya cek kebera
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_AUTH_COOKIE_NAME=auth_token
 ```
 
 ## Menjalankan Frontend
@@ -81,7 +82,7 @@ npm run lint
 
 ### Berhenti di `/auth/callback`
 - cek URL mengandung `?login=success`
-- cek cookie `auth_token` berhasil dibuat oleh backend
+- cek cookie sesuai `NEXT_PUBLIC_AUTH_COOKIE_NAME` berhasil dibuat oleh backend
 
 ### Selalu redirect ke `/401`
 - pastikan backend `/api/auth/session` dan `/api/me` bisa diakses saat cookie valid

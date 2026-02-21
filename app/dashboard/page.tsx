@@ -4,10 +4,11 @@ import LogoutButton from "./LogoutButton";
 import SessionRefresher from "./SessionRefresher";
 import { AppLinkButton, AppPanel, InfoTile } from "@/lib/ui";
 import { getMe, getMyActivity } from "@/lib/api-auth";
+import { getAuthCookieName } from "@/lib/env";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const token = cookieStore.get(getAuthCookieName())?.value;
 
   if (!token) {
     redirect("/401");

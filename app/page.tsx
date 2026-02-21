@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { AppLinkButton, AppPanel } from "@/lib/ui";
 import { hasValidSession } from "@/lib/auth-session";
+import { getAuthCookieName } from "@/lib/env";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const token = cookieStore.get(getAuthCookieName())?.value;
   const isLoggedIn = await hasValidSession(token);
 
   return (

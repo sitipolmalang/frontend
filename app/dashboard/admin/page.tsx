@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminOverview, getMe } from "@/lib/api-auth";
+import { getAuthCookieName } from "@/lib/env";
 import { AppLinkButton, AppPanel, InfoTile } from "@/lib/ui";
 
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const token = cookieStore.get(getAuthCookieName())?.value;
 
   if (!token) {
     redirect("/401");
