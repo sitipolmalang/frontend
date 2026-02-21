@@ -8,10 +8,12 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get(authCookieName)?.value;
   const { pathname } = request.nextUrl;
   const isDashboardRoute = pathname.startsWith("/dashboard");
+  const isTemplatesRoute = pathname.startsWith("/templates");
   const isAdminDashboardRoute = pathname.startsWith("/dashboard/admin");
   const isLoginRoute = pathname === "/login";
+  const isProtectedRoute = isDashboardRoute || isTemplatesRoute;
 
-  if (!token && isDashboardRoute) {
+  if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL("/401", request.url));
   }
 
@@ -22,7 +24,7 @@ export async function proxy(request: NextRequest) {
   const session = await checkSession(token);
 
   if (!session.isValid) {
-    if (isDashboardRoute) {
+    if (isProtectedRoute) {
       const response = NextResponse.redirect(new URL("/401", request.url));
       if (session.shouldClearCookie) {
         response.cookies.delete(authCookieName);
@@ -73,5 +75,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/dashboard/:path*"],
+  matcher: ["/", "/login", "/templates/:path*", "/dashboard/:path*"],
 };

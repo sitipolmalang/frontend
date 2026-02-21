@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "@/lib/env";
 
-export default function LogoutButton() {
+export default function LogoutButton({ className = "" }: { className?: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,7 +39,7 @@ export default function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={isLoading}
-      className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-70"
+      className={`rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
     >
       {isLoading ? "Logging out..." : "Logout"}
     </button>

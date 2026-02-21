@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { AppLinkButton, AppPanel } from "@/lib/ui";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -75,5 +75,29 @@ export default function AuthCallbackPage() {
         </div>
       </AppPanel>
     </div>
+  );
+}
+
+function AuthCallbackFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#eff6ff,_#f8fafc_40%,_#ffffff_75%)] p-6">
+      <AppPanel className="w-full max-w-md p-8 shadow-[0_24px_80px_-50px_rgba(15,23,42,0.45)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+          OAuth Callback
+        </p>
+        <h1 className="mt-3 text-2xl font-semibold text-zinc-900">Loading callback</h1>
+        <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+          Memverifikasi status login...
+        </div>
+      </AppPanel>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<AuthCallbackFallback />}>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
