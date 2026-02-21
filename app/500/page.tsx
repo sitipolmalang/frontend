@@ -8,7 +8,7 @@ export default function InternalServerErrorPage() {
       description="Coba muat ulang halaman atau kembali beberapa saat lagi."
       badgeClassName="border border-indigo-300 bg-indigo-100 text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-200"
       actions={[
-        { href: "/dashboard", label: "Coba Lagi", variant: "primary" },
+        { href: "/dashboard/users", label: "Coba Lagi", variant: "primary" },
         { href: "/", label: "Home", variant: "outline" },
       ]}
     />

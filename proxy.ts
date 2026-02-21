@@ -48,7 +48,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLoginRoute && session.isValid) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard/users", request.url));
   }
 
   if (isAdminDashboardRoute) {

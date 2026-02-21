@@ -22,7 +22,7 @@ export default async function HomePage() {
           ) : null}
           {isLoggedIn ? (
             <AppLinkButton
-              href="/dashboard"
+              href="/dashboard/users"
               className="rounded-full"
               variant="primary"
             >
@@ -52,7 +52,7 @@ export default async function HomePage() {
             ) : null}
             {isLoggedIn ? (
               <AppLinkButton
-                href="/dashboard"
+                href="/dashboard/users"
                 variant="outline"
                 className="rounded-xl px-5 py-3"
               >

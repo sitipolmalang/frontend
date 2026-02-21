@@ -13,7 +13,7 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     if (login && !error) {
-      router.replace("/dashboard");
+      router.replace("/dashboard/users");
     }
   }, [error, login, router]);
 

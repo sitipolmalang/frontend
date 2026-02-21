@@ -15,6 +15,7 @@ import {
   LayoutTemplate,
   LogOut,
   PanelLeft,
+  ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -42,7 +43,6 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -84,6 +84,14 @@ const otherLinks: LinkItem[] = [
   { href: "/templates", label: "Templates", icon: <LayoutTemplate className="size-4" /> },
   { href: "/dashboard/activities", label: "Activities", icon: <Activity className="size-4" /> },
 ];
+
+function isAdminRole(role: string): boolean {
+  return role.toLowerCase() === "admin";
+}
+
+function roleLabel(role: string): string {
+  return isAdminRole(role) ? "Admin" : "User";
+}
 
 function getInitials(name: string): string {
   const parts = name
@@ -159,6 +167,7 @@ function SidebarUserProfile({ user }: { user: SidebarUser }) {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuItem disabled>{roleLabel(user.role)}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
@@ -182,7 +191,7 @@ function SidebarUserProfile({ user }: { user: SidebarUser }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
@@ -195,11 +204,15 @@ function SidebarUserProfile({ user }: { user: SidebarUser }) {
 
 export default function DashboardSidebar({ user, children }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const adminLinks: LinkItem[] = isAdminRole(user.role)
+    ? [{ href: "/dashboard/admin", label: "Admin", icon: <ShieldCheck className="size-4" /> }]
+    : [];
+  const allOtherLinks = [...otherLinks, ...adminLinks];
 
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon" variant="inset" className="border-zinc-200">
-        <SidebarHeader>
+        <SidebarHeader className="h-14 justify-center border-b border-zinc-200 px-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild size="lg" className="data-[active=true]:bg-zinc-100">
@@ -218,8 +231,6 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-
-        <SidebarSeparator />
 
         <SidebarContent>
           <SidebarGroup>
@@ -260,7 +271,7 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
             <SidebarGroupLabel>Other</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {otherLinks.map((item) => (
+                {allOtherLinks.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
                       <Link href={item.href}>

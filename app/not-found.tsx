@@ -9,7 +9,7 @@ export default function NotFoundPage() {
       badgeClassName="border border-sky-300 bg-sky-100 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-200"
       actions={[
         { href: "/", label: "Home", variant: "primary" },
-        { href: "/dashboard", label: "Dashboard", variant: "outline" },
+        { href: "/dashboard/users", label: "Dashboard", variant: "outline" },
       ]}
     />
   );

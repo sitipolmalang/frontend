@@ -33,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         user={{
           name: me.name,
           email: me.email,
-          role: me.role === "admin" ? "Admin" : "User",
+          role: me.role,
         }}
       >
         {children}
