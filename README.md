@@ -1,46 +1,50 @@
 # Frontend (Next.js 16 App Router)
 
-Frontend ini bertanggung jawab untuk:
-- Menampilkan halaman publik (`/`)
-- Menampilkan halaman login (`/login`)
-- Menangani transit callback OAuth (`/auth/callback`)
-- Menampilkan dashboard privat (`/dashboard`)
-- Proteksi route menggunakan `proxy.ts`
+Frontend mengelola UI login, halaman publik/privat, guard route, dan tampilan dashboard.
 
-## 1. Alur Frontend
+## Halaman Utama
 
-1. Pengguna membuka `/login`
-2. Klik `Continue with Google` -> diarahkan ke backend OAuth
-3. Setelah backend selesai autentikasi, pengguna kembali ke `/auth/callback?login=success`
-4. Halaman callback mengarahkan ke `/dashboard`
-5. Dashboard mengambil data pengguna dari backend `GET /api/me`
+- `app/page.tsx` -> homepage
+- `app/login/page.tsx` -> halaman login Google
+- `app/auth/callback/page.tsx` -> halaman transit setelah OAuth
+- `app/dashboard/page.tsx` -> halaman private user
+- `app/dashboard/loading.tsx` -> loading state dashboard
+- `app/dashboard/LogoutButton.tsx` -> tombol logout
+- `app/401/page.tsx` -> unauthorized
+- `app/403/page.tsx` -> forbidden
+- `app/500/page.tsx` -> server/runtime error
+- `app/not-found.tsx` -> 404
+- `app/error.tsx` -> global error boundary
 
-## 2. Route Utama
+## Guard Route
 
-- `app/page.tsx` -> Beranda
-- `app/login/page.tsx` -> Login
-- `app/auth/callback/page.tsx` -> Halaman transit callback OAuth
-- `app/dashboard/page.tsx` -> Dashboard (terproteksi)
-- `app/dashboard/loading.tsx` -> Skeleton loading dashboard
-- `app/dashboard/LogoutButton.tsx` -> Tombol logout client-side
-- `proxy.ts` -> Route guard untuk `/login` dan `/dashboard`
+File: `proxy.ts`
 
-## 3. Library Reusable
+Aturan utama:
+- user belum login + akses `/dashboard` => redirect ke `/401`
+- user sudah login + akses `/login` => redirect ke `/dashboard`
 
-Helper reusable sudah dipisah ke:
+Status login dilihat dari cookie `auth_token`.
+
+## Komponen Reusable
 
 - `lib/ui.tsx`
   - `AppLinkButton`
   - `AppAnchorButton`
   - `AppPanel`
   - `InfoTile`
-
 - `lib/env.ts`
-  - `getApiBaseUrl()`
+  - `getApiBaseUrl()` untuk validasi URL API dari env
 
-Tujuannya agar komponen dan helper mudah dipakai ulang saat UI berkembang.
+## Alur Frontend
 
-## 4. Variabel Environment
+1. Klik login di `/login`.
+2. Browser diarahkan ke backend `/auth/google/redirect`.
+3. Setelah callback backend sukses, frontend menerima redirect ke `/auth/callback?login=success`.
+4. Halaman callback mengarahkan user ke `/dashboard`.
+5. Dashboard menampilkan profil (`/api/me`) dan activity (`/api/me/activity`, max 5).
+
+## Environment
 
 `frontend/.env`:
 
@@ -48,40 +52,36 @@ Tujuannya agar komponen dan helper mudah dipakai ulang saat UI berkembang.
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-## 5. Menjalankan Frontend
+## Menjalankan Frontend
 
 ```bash
 npm install
 npm run dev
 ```
 
-Buka:
-- `http://localhost:3000`
+Akses: `http://localhost:3000`
 
-## 6. Lint
+## Quality Check
 
 ```bash
 npm run lint
 ```
 
-## 7. Catatan Proteksi Route
+## Troubleshooting
 
-Perilaku `proxy.ts`:
-- Jika pengguna belum login dan mengakses `/dashboard` -> redirect ke `/login`
-- Jika pengguna sudah login dan mengakses `/login` -> redirect ke `/dashboard`
+### Berhenti di `/auth/callback`
+- cek URL mengandung `?login=success`
+- cek cookie `auth_token` berhasil dibuat oleh backend
 
-Status login ditentukan dari keberadaan kuki `auth_token`.
+### Selalu redirect ke `/401`
+- pastikan backend `/api/me` bisa diakses saat cookie valid
+- cek konfigurasi cookie backend (`AUTH_COOKIE_*`)
+- pastikan `NEXT_PUBLIC_API_URL` benar
 
-## 8. Pemecahan Masalah Cepat
+### Role admin tidak muncul di dashboard
+- role berasal dari response `/api/me`
+- cek `users.role` di backend
+- cek variabel `ADMIN_EMAILS` untuk auto-admin
 
-### Masih tertahan di `/auth/callback`
-- pastikan query callback `login=success`
-- cek kuki `auth_token` terbentuk
-
-### Dashboard redirect terus ke login
-- cek endpoint backend `/api/me`
-- cek pengaturan kuki backend (`AUTH_COOKIE_*`)
-- cek `NEXT_PUBLIC_API_URL` sudah benar
-
-### Warning preload font di console
-- proyek sudah set `preload: false` pada font utama untuk menghindari warning preload tidak terpakai
+### Warning preload font di browser
+- konfigurasi font utama sudah diset `preload: false` untuk mencegah warning preload yang tidak terpakai
