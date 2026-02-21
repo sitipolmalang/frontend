@@ -23,3 +23,18 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
 }
+
+.auth-card-reveal {
+  animation: auth-card-reveal 480ms ease-out;
+}
+
+@keyframes auth-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
