@@ -20,6 +20,14 @@ export default function LogoutButton() {
           Accept: "application/json",
         },
       });
+
+      await fetch("/api/auth/session/revalidate", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      });
     } finally {
       router.push("/login");
       router.refresh();

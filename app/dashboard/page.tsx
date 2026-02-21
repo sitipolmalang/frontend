@@ -1,86 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import LogoutButton from "./LogoutButton";
+import SessionRefresher from "./SessionRefresher";
 import { AppLinkButton, AppPanel, InfoTile } from "@/lib/ui";
-import { getApiBaseUrl } from "@/lib/env";
-
-type MeResponse = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  created_at: string;
-};
-
-type ActivityItem = {
-  event: string;
-  ip_address: string | null;
-  user_agent: string | null;
-  request_id: string | null;
-  created_at: string;
-};
-
-type MeResult =
-  | { kind: "ok"; user: MeResponse }
-  | { kind: "unauthorized" }
-  | { kind: "error" };
-
-type ActivityResult =
-  | { kind: "ok"; items: ActivityItem[] }
-  | { kind: "unauthorized" }
-  | { kind: "error" };
-
-async function getMe(token: string): Promise<MeResult> {
-  const apiBaseUrl = getApiBaseUrl();
-
-  const response = await fetch(`${apiBaseUrl}/api/me`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (response.status === 401 || response.status === 403) {
-    return { kind: "unauthorized" };
-  }
-
-  if (!response.ok) {
-    return { kind: "error" };
-  }
-
-  return {
-    kind: "ok",
-    user: (await response.json()) as MeResponse,
-  };
-}
-
-async function getMyActivity(token: string): Promise<ActivityResult> {
-  const apiBaseUrl = getApiBaseUrl();
-
-  const response = await fetch(`${apiBaseUrl}/api/me/activity`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (response.status === 401 || response.status === 403) {
-    return { kind: "unauthorized" };
-  }
-
-  if (!response.ok) {
-    return { kind: "error" };
-  }
-
-  return {
-    kind: "ok",
-    items: (await response.json()) as ActivityItem[],
-  };
-}
+import { getMe, getMyActivity } from "@/lib/api-auth";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -92,7 +15,7 @@ export default async function DashboardPage() {
 
   const result = await getMe(token);
 
-  if (result.kind === "unauthorized") {
+  if (result.kind === "unauthorized" || result.kind === "forbidden") {
     redirect("/401");
   }
 
@@ -100,17 +23,22 @@ export default async function DashboardPage() {
     redirect("/500");
   }
 
-  const me = result.user;
+  const me = result.data;
   const activityResult = await getMyActivity(token);
 
-  if (activityResult.kind === "unauthorized") {
+  if (activityResult.kind === "unauthorized" || activityResult.kind === "forbidden") {
     redirect("/401");
   }
 
-  const activity = activityResult.kind === "ok" ? activityResult.items : [];
+  if (activityResult.kind === "error") {
+    redirect("/500");
+  }
+
+  const activity = activityResult.data;
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10">
+      <SessionRefresher />
       <main className="mx-auto w-full max-w-5xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -132,6 +60,11 @@ export default async function DashboardPage() {
             <AppLinkButton href="/" variant="outline" className="px-3">
               Home
             </AppLinkButton>
+            {me.role === "admin" ? (
+              <AppLinkButton href="/dashboard/admin" variant="secondary" className="px-3">
+                Admin
+              </AppLinkButton>
+            ) : null}
             <LogoutButton />
           </div>
         </div>
