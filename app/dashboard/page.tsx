@@ -1,8 +1,7 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import LogoutButton from "./LogoutButton";
 
 type MeResponse = {
   id: number;
@@ -11,61 +10,75 @@ type MeResponse = {
   created_at: string;
 };
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const apiBaseUrl = useMemo(
-    () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
-    []
-  );
+type MeResult =
+  | { kind: "ok"; user: MeResponse }
+  | { kind: "unauthorized" }
+  | { kind: "error" };
 
-  const [status, setStatus] = useState("Memuat dashboard...");
-  const [me, setMe] = useState<MeResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string>("");
+async function getMe(token: string): Promise<MeResult> {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-  useEffect(() => {
-    fetch(`${apiBaseUrl}/api/me`, {
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-      },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Unauthorized");
-        }
+  const response = await fetch(`${apiBaseUrl}/api/me`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
 
-        const data: MeResponse = await response.json();
-        setMe(data);
-        setStatus("Sesi aktif.");
-      })
-      .catch((error: unknown) => {
-        const message =
-          error instanceof Error ? error.message : "Gagal memuat dashboard.";
-        setFetchError(message);
-        setStatus("Sesi tidak valid.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [apiBaseUrl]);
+  if (response.status === 401 || response.status === 403) {
+    return { kind: "unauthorized" };
+  }
 
-  const handleLogout = async () => {
-    const response = await fetch(`${apiBaseUrl}/api/logout`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-      },
-    });
+  if (!response.ok) {
+    return { kind: "error" };
+  }
 
-    if (!response.ok) {
-      setStatus("Logout gagal.");
-      return;
-    }
-
-    router.push("/login");
+  return {
+    kind: "ok",
+    user: (await response.json()) as MeResponse,
   };
+}
+
+export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  if (!token) {
+    redirect("/login");
+  }
+
+  const result = await getMe(token);
+
+  if (result.kind === "unauthorized") {
+    redirect("/login");
+  }
+
+  if (result.kind === "error") {
+    return (
+      <div className="min-h-screen bg-zinc-50 px-6 py-10">
+        <main className="mx-auto w-full max-w-5xl">
+          <section className="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center">
+            <h2 className="text-base font-semibold text-zinc-900">
+              Dashboard belum tersedia
+            </h2>
+            <p className="mt-2 text-sm text-zinc-500">
+              Terjadi kendala saat memuat data akun.
+            </p>
+            <Link
+              href="/"
+              className="mt-5 inline-flex rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+              Kembali ke Home
+            </Link>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  const me = result.user;
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10">
@@ -79,88 +92,49 @@ export default function DashboardPage() {
             >
               Home
             </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-            >
-              Logout
-            </button>
+            <LogoutButton />
           </div>
         </div>
 
-        <p className="mb-5 text-sm text-zinc-500">{status}</p>
-
-        {isLoading ? (
-          <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Account Overview
-            </h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="h-24 animate-pulse rounded-xl bg-zinc-100" />
-              <div className="h-24 animate-pulse rounded-xl bg-zinc-100" />
-              <div className="h-24 animate-pulse rounded-xl bg-zinc-100" />
-              <div className="h-24 animate-pulse rounded-xl bg-zinc-100" />
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-zinc-900">
+            Account Overview
+          </h2>
+          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                Name
+              </dt>
+              <dd className="mt-2 text-sm font-medium text-zinc-900">
+                {me.name}
+              </dd>
             </div>
-          </section>
-        ) : null}
-
-        {!isLoading && !me && fetchError ? (
-          <section className="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Dashboard belum tersedia
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">{fetchError}</p>
-            <Link
-              href="/login"
-              className="mt-5 inline-flex rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-            >
-              Kembali ke Login
-            </Link>
-          </section>
-        ) : null}
-
-        {!isLoading && me ? (
-          <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Account Overview
-            </h2>
-            <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-zinc-500">
-                  Name
-                </dt>
-                <dd className="mt-2 text-sm font-medium text-zinc-900">
-                  {me.name}
-                </dd>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-zinc-500">
-                  Email
-                </dt>
-                <dd className="mt-2 text-sm font-medium text-zinc-900">
-                  {me.email}
-                </dd>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-zinc-500">
-                  User ID
-                </dt>
-                <dd className="mt-2 text-sm font-medium text-zinc-900">
-                  {me.id}
-                </dd>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-zinc-500">
-                  Joined
-                </dt>
-                <dd className="mt-2 text-sm font-medium text-zinc-900">
-                  {new Date(me.created_at).toLocaleString()}
-                </dd>
-              </div>
-            </dl>
-          </section>
-        ) : null}
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                Email
+              </dt>
+              <dd className="mt-2 text-sm font-medium text-zinc-900">
+                {me.email}
+              </dd>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                User ID
+              </dt>
+              <dd className="mt-2 text-sm font-medium text-zinc-900">
+                {me.id}
+              </dd>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                Joined
+              </dt>
+              <dd className="mt-2 text-sm font-medium text-zinc-900">
+                {new Date(me.created_at).toLocaleString()}
+              </dd>
+            </div>
+          </dl>
+        </section>
       </main>
     </div>
   );
