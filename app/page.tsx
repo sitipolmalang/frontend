@@ -1,26 +1,78 @@
-export default function Home() {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-  const loginUrl = `${apiBaseUrl}/auth/google/redirect`;
+import Link from "next/link";
+import { cookies } from "next/headers";
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const isLoggedIn = Boolean(cookieStore.get("auth_token")?.value);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-100 p-6">
-      <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold text-zinc-900">Google Login Demo</h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Klik tombol di bawah untuk login menggunakan akun Google melalui Laravel API.
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f5f7ff,_#f8fafc_45%,_#ffffff_80%)]">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
+        <p className="text-sm font-semibold tracking-wide text-zinc-800">
+          Laranext Auth
         </p>
-        <a
-          href={loginUrl}
-          className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-zinc-900 px-4 py-3 text-sm font-medium text-white hover:bg-zinc-700"
-        >
-          Login with Google
-        </a>
-        <a
-          href="/profile"
-          className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
-        >
-          Buka Profile
-        </a>
+        <div className="flex items-center gap-2">
+          {!isLoggedIn ? (
+            <Link
+              href="/login"
+              className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Login
+            </Link>
+          ) : null}
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            >
+              Dashboard
+            </Link>
+          ) : null}
+        </div>
+      </header>
+
+      <main className="mx-auto grid w-full max-w-6xl gap-8 px-6 pb-20 pt-10 md:grid-cols-2 md:items-center">
+        <section>
+          <p className="inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600">
+            SaaS-ready authentication
+          </p>
+          <h1 className="mt-5 text-4xl font-semibold leading-tight text-zinc-900 md:text-5xl">
+            Login Google cepat untuk produk SaaS kamu.
+          </h1>
+          <p className="mt-4 max-w-xl text-base text-zinc-600">
+            Landing page publik di sini, login dipisah di halaman khusus, dan
+            dashboard diproteksi dengan sesi berbasis cookie httpOnly.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {!isLoggedIn ? (
+              <Link
+                href="/login"
+                className="rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white hover:bg-zinc-700"
+              >
+                Mulai Login
+              </Link>
+            ) : null}
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              >
+                Lihat Dashboard
+              </Link>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_20px_80px_-48px_rgba(15,23,42,0.55)]">
+          <h2 className="text-lg font-semibold text-zinc-900">
+            Arsitektur saat ini
+          </h2>
+          <ul className="mt-4 space-y-3 text-sm text-zinc-600">
+            <li>Laravel Socialite untuk OAuth Google</li>
+            <li>Sanctum token disimpan di cookie httpOnly</li>
+            <li>Next.js route `/dashboard` diproteksi proxy</li>
+          </ul>
+        </section>
       </main>
     </div>
   );
