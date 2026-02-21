@@ -47,33 +47,17 @@ export default async function DashboardPage() {
   const token = cookieStore.get("auth_token")?.value;
 
   if (!token) {
-    redirect("/login");
+    redirect("/401");
   }
 
   const result = await getMe(token);
 
   if (result.kind === "unauthorized") {
-    redirect("/login");
+    redirect("/401");
   }
 
   if (result.kind === "error") {
-    return (
-      <div className="min-h-screen bg-zinc-50 px-6 py-10">
-        <main className="mx-auto w-full max-w-5xl">
-          <AppPanel className="border-dashed border-zinc-300 p-8 text-center">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Dashboard belum tersedia
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Terjadi kendala saat memuat data akun.
-            </p>
-            <AppLinkButton href="/" variant="primary" className="mt-5">
-              Kembali ke Home
-            </AppLinkButton>
-          </AppPanel>
-        </main>
-      </div>
-    );
+    redirect("/500");
   }
 
   const me = result.user;
