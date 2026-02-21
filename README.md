@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend (Next.js 16 App Router)
 
-## Getting Started
+Frontend ini bertanggung jawab untuk:
+- Menampilkan halaman publik (`/`)
+- Menampilkan halaman login (`/login`)
+- Menangani transit callback OAuth (`/auth/callback`)
+- Menampilkan dashboard privat (`/dashboard`)
+- Proteksi route menggunakan `proxy.ts`
 
-First, run the development server:
+## 1. Alur Frontend
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. Pengguna membuka `/login`
+2. Klik `Continue with Google` -> diarahkan ke backend OAuth
+3. Setelah backend selesai autentikasi, pengguna kembali ke `/auth/callback?login=success`
+4. Halaman callback mengarahkan ke `/dashboard`
+5. Dashboard mengambil data pengguna dari backend `GET /api/me`
+
+## 2. Route Utama
+
+- `app/page.tsx` -> Beranda
+- `app/login/page.tsx` -> Login
+- `app/auth/callback/page.tsx` -> Halaman transit callback OAuth
+- `app/dashboard/page.tsx` -> Dashboard (terproteksi)
+- `app/dashboard/loading.tsx` -> Skeleton loading dashboard
+- `app/dashboard/LogoutButton.tsx` -> Tombol logout client-side
+- `proxy.ts` -> Route guard untuk `/login` dan `/dashboard`
+
+## 3. Library Reusable
+
+Helper reusable sudah dipisah ke:
+
+- `lib/ui.tsx`
+  - `AppLinkButton`
+  - `AppAnchorButton`
+  - `AppPanel`
+  - `InfoTile`
+
+- `lib/env.ts`
+  - `getApiBaseUrl()`
+
+Tujuannya agar komponen dan helper mudah dipakai ulang saat UI berkembang.
+
+## 4. Variabel Environment
+
+`frontend/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 5. Menjalankan Frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Buka:
+- `http://localhost:3000`
 
-## Learn More
+## 6. Lint
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 7. Catatan Proteksi Route
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Perilaku `proxy.ts`:
+- Jika pengguna belum login dan mengakses `/dashboard` -> redirect ke `/login`
+- Jika pengguna sudah login dan mengakses `/login` -> redirect ke `/dashboard`
 
-## Deploy on Vercel
+Status login ditentukan dari keberadaan kuki `auth_token`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 8. Pemecahan Masalah Cepat
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Masih tertahan di `/auth/callback`
+- pastikan query callback `login=success`
+- cek kuki `auth_token` terbentuk
+
+### Dashboard redirect terus ke login
+- cek endpoint backend `/api/me`
+- cek pengaturan kuki backend (`AUTH_COOKIE_*`)
+- cek `NEXT_PUBLIC_API_URL` sudah benar
+
+### Warning preload font di console
+- proyek sudah set `preload: false` pada font utama untuk menghindari warning preload tidak terpakai
