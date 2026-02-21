@@ -1,9 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
   BadgeCheck,
@@ -112,22 +111,24 @@ function SidebarUserProfile({ user }: { user: SidebarUser }) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const apiBaseUrl = getApiBaseUrl();
+    try {
+      const apiBaseUrl = getApiBaseUrl();
 
-    await fetch(`${apiBaseUrl}/api/logout`, {
-      method: "POST",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
+      await fetch(`${apiBaseUrl}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
 
-    await fetch("/api/auth/session/revalidate", {
-      method: "POST",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-
-    router.push("/login");
-    router.refresh();
+      await fetch("/api/auth/session/revalidate", {
+        method: "POST",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
   };
 
   return (
@@ -204,10 +205,23 @@ function SidebarUserProfile({ user }: { user: SidebarUser }) {
 
 export default function DashboardSidebar({ user, children }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const adminLinks: LinkItem[] = isAdminRole(user.role)
     ? [{ href: "/dashboard/admin", label: "Admin", icon: <ShieldCheck className="size-4" /> }]
     : [];
   const allOtherLinks = [...otherLinks, ...adminLinks];
+
+  useEffect(() => {
+    const prefetchTargets = [
+      ...mainLinks.map((item) => item.href),
+      ...otherLinks.map((item) => item.href),
+      ...(isAdminRole(user.role) ? ["/dashboard/admin"] : []),
+    ];
+
+    prefetchTargets.forEach((href) => {
+      router.prefetch(href);
+    });
+  }, [router, user.role]);
 
   return (
     <SidebarProvider>

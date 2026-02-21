@@ -1,44 +1,17 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getAdminOverview, getMe } from "@/lib/api-auth";
-import { getAuthCookieName } from "@/lib/env";
+import { getAdminOverview } from "@/lib/api-auth";
+import { requireAdminUser } from "@/lib/server-auth";
 import { AppLinkButton, AppPanel, InfoTile } from "@/lib/ui";
 
 export default async function AdminDashboardPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(getAuthCookieName())?.value;
-
-  if (!token) {
-    redirect("/401");
-  }
-
-  const meResult = await getMe(token);
-
-  if (meResult.kind === "unauthorized") {
-    redirect("/401");
-  }
-
-  if (meResult.kind === "forbidden") {
-    redirect("/403");
-  }
-
-  if (meResult.kind === "error") {
-    redirect("/500");
-  }
-
-  if (meResult.data.role !== "admin") {
-    redirect("/403");
-  }
+  const { token } = await requireAdminUser();
 
   const overviewResult = await getAdminOverview(token);
 
   if (overviewResult.kind === "unauthorized") {
     redirect("/401");
   }
-
-  if (overviewResult.kind === "forbidden") {
-    redirect("/403");
-  }
+  if (overviewResult.kind === "forbidden") redirect("/403");
 
   if (overviewResult.kind === "error") {
     redirect("/500");

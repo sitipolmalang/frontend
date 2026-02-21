@@ -1,28 +1,10 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppPanel, InfoTile } from "@/lib/ui";
-import { getMe, getMyActivity } from "@/lib/api-auth";
-import { getAuthCookieName } from "@/lib/env";
+import { getMyActivity } from "@/lib/api-auth";
+import { requireAuthUser } from "@/lib/server-auth";
 
 export default async function DashboardActivitiesPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(getAuthCookieName())?.value;
-
-  if (!token) {
-    redirect("/401");
-  }
-
-  const meResult = await getMe(token);
-
-  if (meResult.kind === "unauthorized" || meResult.kind === "forbidden") {
-    redirect("/401");
-  }
-
-  if (meResult.kind === "error") {
-    redirect("/500");
-  }
-
-  const me = meResult.data;
+  const { token, user } = await requireAuthUser();
   const activityResult = await getMyActivity(token);
 
   if (activityResult.kind === "unauthorized" || activityResult.kind === "forbidden") {
@@ -50,11 +32,11 @@ export default async function DashboardActivitiesPage() {
       <AppPanel className="p-6">
         <h2 className="text-base font-semibold text-zinc-900">Account Overview</h2>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          <InfoTile label="Name" value={me.name} />
-          <InfoTile label="Email" value={me.email} />
-          <InfoTile label="Role" value={me.role === "admin" ? "Admin" : "User"} />
-          <InfoTile label="User ID" value={me.id} />
-          <InfoTile label="Joined" value={new Date(me.created_at).toLocaleString()} />
+          <InfoTile label="Name" value={user.name} />
+          <InfoTile label="Email" value={user.email} />
+          <InfoTile label="Role" value={user.role === "admin" ? "Admin" : "User"} />
+          <InfoTile label="User ID" value={user.id} />
+          <InfoTile label="Joined" value={new Date(user.created_at).toLocaleString()} />
         </dl>
       </AppPanel>
 
