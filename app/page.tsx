@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
+import { AppLinkButton, AppPanel } from "@/lib/ui";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
@@ -13,20 +13,18 @@ export default async function HomePage() {
         </p>
         <div className="flex items-center gap-2">
           {!isLoggedIn ? (
-            <Link
-              href="/login"
-              className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-            >
+            <AppLinkButton href="/login" className="rounded-full" variant="outline">
               Login
-            </Link>
+            </AppLinkButton>
           ) : null}
           {isLoggedIn ? (
-            <Link
+            <AppLinkButton
               href="/dashboard"
-              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+              className="rounded-full"
+              variant="primary"
             >
               Dashboard
-            </Link>
+            </AppLinkButton>
           ) : null}
         </div>
       </header>
@@ -45,25 +43,23 @@ export default async function HomePage() {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {!isLoggedIn ? (
-              <Link
-                href="/login"
-                className="rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white hover:bg-zinc-700"
-              >
+              <AppLinkButton href="/login" variant="primary" className="rounded-xl px-5 py-3">
                 Mulai Login
-              </Link>
+              </AppLinkButton>
             ) : null}
             {isLoggedIn ? (
-              <Link
+              <AppLinkButton
                 href="/dashboard"
-                className="rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                variant="outline"
+                className="rounded-xl px-5 py-3"
               >
                 Lihat Dashboard
-              </Link>
+              </AppLinkButton>
             ) : null}
           </div>
         </section>
 
-        <section className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_20px_80px_-48px_rgba(15,23,42,0.55)]">
+        <AppPanel className="rounded-3xl p-8 shadow-[0_20px_80px_-48px_rgba(15,23,42,0.55)]">
           <h2 className="text-lg font-semibold text-zinc-900">
             Arsitektur saat ini
           </h2>
@@ -72,7 +68,7 @@ export default async function HomePage() {
             <li>Sanctum token disimpan di cookie httpOnly</li>
             <li>Next.js route `/dashboard` diproteksi proxy</li>
           </ul>
-        </section>
+        </AppPanel>
       </main>
     </div>
   );

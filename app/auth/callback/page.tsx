@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { AppLinkButton, AppPanel } from "@/lib/ui";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#eff6ff,_#f8fafc_40%,_#ffffff_75%)] p-6">
-      <main className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-[0_24px_80px_-50px_rgba(15,23,42,0.45)]">
+      <AppPanel className="w-full max-w-md p-8 shadow-[0_24px_80px_-50px_rgba(15,23,42,0.45)]">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
           OAuth Callback
         </p>
@@ -66,20 +66,14 @@ export default function AuthCallbackPage() {
         ) : null}
 
         <div className="mt-7 flex items-center gap-3">
-          <Link
-            href="/login"
-            className="inline-flex rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-          >
+          <AppLinkButton href="/login" variant="primary">
             Back to Login
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-          >
+          </AppLinkButton>
+          <AppLinkButton href="/" variant="outline">
             Home
-          </Link>
+          </AppLinkButton>
         </div>
-      </main>
+      </AppPanel>
     </div>
   );
 }
