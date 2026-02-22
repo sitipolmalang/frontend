@@ -69,6 +69,32 @@ type SoonItem = {
   icon: ReactNode;
 };
 
+function SidebarNavLink({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={() => {
+        if (isMobile) {
+          setOpenMobile(false);
+        }
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
+
 const mainLinks: LinkItem[] = [
   { href: "/dashboard/users", label: "Dashboard", icon: <Users className="size-4" /> },
   { href: "/dashboard/websites", label: "Websites", icon: <Globe className="size-4" /> },
@@ -230,7 +256,7 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild size="lg" className="data-[active=true]:bg-zinc-100">
-                <Link href="/dashboard/users">
+                <SidebarNavLink href="/dashboard/users">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
                     <PanelLeft className="size-4" />
                   </div>
@@ -240,7 +266,7 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
                     </span>
                     <span className="truncate font-semibold text-zinc-900">OyiWeb</span>
                   </div>
-                </Link>
+                </SidebarNavLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -253,11 +279,16 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
               <SidebarMenu>
                 {mainLinks.map((item) => (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
-                      <Link href={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.label}
+                      className="transition-[background-color,color,transform] duration-200 ease-out hover:translate-x-0.5"
+                    >
+                      <SidebarNavLink href={item.href}>
                         {item.icon}
                         <span>{item.label}</span>
-                      </Link>
+                      </SidebarNavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -287,11 +318,16 @@ export default function DashboardSidebar({ user, children }: DashboardSidebarPro
               <SidebarMenu>
                 {allOtherLinks.map((item) => (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
-                      <Link href={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.label}
+                      className="transition-[background-color,color,transform] duration-200 ease-out hover:translate-x-0.5"
+                    >
+                      <SidebarNavLink href={item.href}>
                         {item.icon}
                         <span>{item.label}</span>
-                      </Link>
+                      </SidebarNavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
